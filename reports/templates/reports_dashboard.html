@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📊 Hotel Reports Dashboard</h2>
+
+    <!-- ===== ROOMS STATS ===== -->
+    <h5 class="text-muted text-uppercase mb-3">🏨 Rooms Overview</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Total Rooms</h6>
+                    <h2 class="fw-bold">{{ total_rooms }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Occupied</h6>
+                    <h2 class="fw-bold">{{ occupied_rooms }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Available</h6>
+                    <h2 class="fw-bold">{{ available_rooms }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ROOM CATEGORIES ===== -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light fw-bold">Rooms by Category</div>
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Category</th>
+                        <th>Number of Rooms</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in category_stats %}
+                    <tr>
+                        <td>{{ cat.category }}</td>
+                        <td>{{ cat.count }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-muted text-center">No rooms registered.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===== GUESTS STATS ===== -->
+    <h5 class="text-muted text-uppercase mb-3">👥 Guests Overview</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-dark shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Total Guests</h6>
+                    <h2 class="fw-bold">{{ total_guests }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Assigned to Rooms</h6>
+                    <h2 class="fw-bold">{{ guests_with_room }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-dark bg-warning shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Not Yet Assigned</h6>
+                    <h2 class="fw-bold">{{ guests_without_room }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== PAYMENTS STATS ===== -->
+    <h5 class="text-muted text-uppercase mb-3">💳 Payments Overview</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-secondary shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Total Transactions</h6>
+                    <h2 class="fw-bold">{{ total_payments }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-dark bg-light border shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">📱 Mobile Money Revenue</h6>
+                    <h2 class="fw-bold text-warning">UGX {{ mobile_money_total|floatformat:0 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-dark bg-light border shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title">💵 Cash Revenue</h6>
+                    <h2 class="fw-bold text-success">UGX {{ cash_total|floatformat:0 }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Revenue Banner -->
+    <div class="alert alert-success shadow-sm text-center mb-4">
+        <h5 class="mb-0">💰 Total Revenue Collected: <strong>UGX {{ total_revenue|floatformat:0 }}</strong></h5>
+    </div>
+
+    <!-- ===== RECENT PAYMENTS TABLE ===== -->
+    <h5 class="text-muted text-uppercase mb-3">🕒 Recent Payments (Last 5)</h5>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Room</th>
+                        <th>Amount (UGX)</th>
+                        <th>Method</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in recent_payments %}
+                    <tr>
+                        <td><span class="badge bg-info text-dark">Room {{ payment.room.room_number }}</span></td>
+                        <td class="fw-bold">UGX {{ payment.amount|floatformat:0 }}</td>
+                        <td>
+                            {% if payment.payment_type == 'Mobile Money' %}
+                                <span class="badge bg-warning text-dark">📱 Mobile Money</span>
+                            {% else %}
+                                <span class="badge bg-secondary">💵 Cash</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ payment.payment_date }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-3">No payments recorded yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
